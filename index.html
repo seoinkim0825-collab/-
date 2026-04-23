@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>강아지 몰래 쏘이갈릭킹!</title>
+<style>
+    @font-face {
+        font-family: 'BMKkubulimTTF';
+        src: url('BMKkubulimTTF.ttf') format('truetype');
+    }
+    
+    body { margin: 0; background: #000; font-family: 'Arial', sans-serif; text-align: center; overflow: hidden; touch-action: manipulation; }
+    
+    #game { 
+        position: relative; 
+        width: 100vw; 
+        height: 100vh; 
+        max-width: 600px; 
+        margin: 0 auto; 
+        border: none; 
+        overflow: hidden; 
+        background-color: #fffbe6;
+        background-image: url('배경2.png'); 
+        background-size: cover; 
+        background-position: center; 
+    }
+
+    #start-screen {
+        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+        background-image: url('첫 장면.png'); background-size: cover; background-position: center;
+        z-index: 500; display: flex; justify-content: flex-start; align-items: center;
+        flex-direction: column; overflow: hidden;
+    }
+
+    /* ✨ 파티클 스타일 (60개 최적화) */
+    #particle-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 501; pointer-events: none; }
+    .particle {
+        position: absolute; border-radius: 50%; background: #ffffff; 
+        box-shadow: 0 0 15px 5px rgba(255, 255, 255, 0.75);
+        animation: twinkleFade 0.6s infinite steps(2);
+        opacity: 0;
+    }
+
+    @keyframes twinkleFade { 
+        0% { opacity: 0; transform: scale(0.4); } 
+        100% { opacity: 1; transform: scale(1.1); } 
+    }
+
+    /* 💖 손까딱 스타일 */
+    #waving-hand {
+        position: absolute;
+        bottom: 20px;      
+        right: -80px;      
+        width: 500px;      
+        height: auto;
+        z-index: 505;      
+        pointer-events: none;
+        animation: wavingHand 0.6s infinite steps(2); 
+        transform-origin: bottom right;
+    }
+
+    @keyframes wavingHand {
+        0% { transform: rotate(-12deg); }
+        100% { transform: rotate(12deg); }
+    }
+
+    /* UI 및 버튼 스타일 */
+    .ui { position: absolute; top: 20px; left: 20px; font-size: 22px; font-weight: bold; color: #5d4037; z-index: 100; background: rgba(255, 255, 255, 0.85); padding: 5px 15px; border-radius: 20px; }
+    .dog-container { position: absolute; top: 2%; left: 50%; transform: translateX(-50%); width: 660px; pointer-events: none; z-index: 10; }
+    #dog-img { width: 100%; height: auto; }
+    .item { position: absolute; width: 110px; height: auto; cursor: pointer; z-index: 50; }
+    .item.selected { filter: drop-shadow(0 0 20px #ff5722) brightness(1.1); transform: scale(1.2) rotate(5deg); }
+    #result-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: url('점수.png'); background-size: cover; background-position: center; display: none; flex-direction: column; justify-content: flex-start; align-items: center; z-index: 300; color: white; font-family: 'BMKkubulimTTF', sans-serif; padding-top: 15vh; }
+    .btn-action { padding: 15px 40px; background: #ff4081; color: white; border-radius: 50px; border: none; font-size: 24px; font-family: 'BMKkubulimTTF', sans-serif; font-weight: bold; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.5); z-index: 502; position: relative; }
+    #start-btn { margin-top: 40vh; } 
+</style>
+</head>
+<body>
+
+<div id="game">
+    <div id="start-screen">
+        <div id="particle-container"></div>
+        <button id="start-btn" class="btn-action">게임 시작하기</button>
+        <img id="waving-hand" src="손까딱.png" alt="✋">
+    </div>
+
+    <div class="ui">점수: <span id="score">0</span> / 100</div>
+    <div class="dog-container">
+        <img id="dog-img" src="뒷모습 강아지.png" alt="강아지">
+    </div>
+    <img id="chicken" class="item" src="치킨.png" alt="치킨" style="display: none;">
+    <img id="sauce" class="item" src="갈릭 소스.png" alt="갈릭 소스" style="display: none;">
+
+    <div id="ending-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #000; display: none; justify-content: center; align-items: center; z-index: 200;">
+        <img id="full-ending-img" src="" alt="ending" style="width: 100%; height: 100%; object-fit: contain;">
+    </div>
+    
+    <div id="result-screen">
+        <div style="font-size: 68px; text-shadow: 3px 3px 8px #000; margin-bottom: 20px; line-height: 1.1;">손 쉴 틈 없이 먹은<br>치킨 조각</div>
+        <div style="font-size: 80px; color: #ffcc00; text-shadow: 4px 4px 10px #000; margin-bottom: 20px;"><span id="last-score">0</span>개</div>
+        <button onclick="location.reload()" class="btn-action">다시 도전하기</button>
+    </div>
+</div>
+
+<script>
+    let score = 0; let isLooking = false; let gameOver = true;
+    const startScreen = document.getElementById("start-screen");
+    const particleContainer = document.getElementById("particle-container");
+
+    function createParticles() {
+        if (!gameOver) return;
+        
+        // 🚀 개수 60개로 최종 설정
+        for(let i=0; i<60; i++) {
+            const p = document.createElement("div");
+            p.className = "particle";
+            const size = Math.random() * 9 + 3; 
+            p.style.width = `${size}px`; 
+            p.style.height = `${size}px`;
+            p.style.top = `${Math.random() * 100}%`; 
+            p.style.left = `${Math.random() * 100}%`;
+            particleContainer.appendChild(p);
+            
+            setTimeout(() => {
+                if(p.parentNode) p.remove();
+            }, 600);
+        }
+    }
+
+    let pInterval = setInterval(createParticles, 600);
+
+    document.getElementById("start-btn").addEventListener("click", () => {
+        startScreen.style.display = "none"; 
+        clearInterval(pInterval);
+        particleContainer.innerHTML = '';
+        gameOver = false; 
+        relocateItems();
+        randomTurn();
+    });
+
+    // 게임 로직 유지
+    const scoreEl = document.getElementById("score");
+    const dogImg = document.getElementById("dog-img");
+    const chicken = document.getElementById("chicken");
+    const sauce = document.getElementById("sauce");
+    const resultScreen = document.getElementById("result-screen");
+    const lastScoreEl = document.getElementById("last-score");
+    let state = "idle";
+
+    function relocateItems() {
+        if (gameOver) return;
+        const gameWidth = document.getElementById("game").clientWidth;
+        const gameHeight = document.getElementById("game").clientHeight;
+        chicken.style.left = `${Math.random() * (gameWidth - 150) + 50}px`;
+        chicken.style.top = `${Math.random() * (gameHeight - 400) + 300}px`;
+        sauce.style.left = `${Math.random() * (gameWidth - 150) + 50}px`;
+        sauce.style.top = `${Math.random() * (gameHeight - 400) + 300}px`;
+        chicken.style.display = "block"; sauce.style.display = "block";
+        chicken.classList.remove("selected");
+        state = "idle";
+    }
+
+    function randomTurn() {
+        if (gameOver) return;
+        let waitTime = Math.random() * 2000 + 1000;
+        setTimeout(() => {
+            if (gameOver) return;
+            isLooking = true;
+            dogImg.src = "뒤돌아 보는 강아지.png"; 
+            setTimeout(() => {
+                if (gameOver) return;
+                isLooking = false;
+                dogImg.src = "뒷모습 강아지.png"; 
+                randomTurn();
+            }, 800);
+        }, waitTime);
+    }
+
+    chicken.addEventListener("mousedown", () => {
+        if (gameOver) return;
+        if (isLooking) return endGame();
+        if (state === "idle") { state = "picked"; chicken.classList.add("selected"); }
+    });
+
+    sauce.addEventListener("mousedown", () => {
+        if (gameOver) return;
+        if (isLooking) return endGame();
+        if (state === "picked") {
+            score++; scoreEl.innerText = score;
+            relocateItems();
+            if (score >= 100) { gameOver = true; alert("성공!"); location.reload(); }
+        }
+    });
+
+    function endGame() {
+        gameOver = true;
+        const fullEndingImg = document.getElementById("full-ending-img");
+        document.getElementById("ending-overlay").style.display = "flex";
+        fullEndingImg.src = "ending1.png"; 
+        setTimeout(() => {
+            fullEndingImg.src = "ending2.png"; 
+            setTimeout(() => {
+                document.getElementById("ending-overlay").style.display = "none";
+                resultScreen.style.display = "flex";
+                lastScoreEl.innerText = score;
+            }, 1200);
+        }, 800);
+    }
+</script>
+</body>
+</html>
