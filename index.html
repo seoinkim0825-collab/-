@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>강아지 몰래 쏘이갈릭킹!</title>
 <style>
     @font-face {
@@ -10,30 +10,38 @@
         src: url('BMKkubulimTTF.ttf') format('truetype');
     }
     
-    body { margin: 0; background: #000; font-family: 'Arial', sans-serif; text-align: center; overflow: hidden; touch-action: manipulation; }
+    body { 
+        margin: 0; 
+        padding: 0;
+        background: #000; 
+        font-family: 'Arial', sans-serif; 
+        text-align: center; 
+        overflow: hidden; 
+        touch-action: manipulation; /* 모바일에서 더블탭 줌 방지 */
+    }
     
     #game { 
         position: relative; 
         width: 100vw; 
         height: 100vh; 
-        max-width: 600px; 
         margin: 0 auto; 
-        border: none; 
         overflow: hidden; 
         background-color: #fffbe6;
         background-image: url('배경2.png'); 
-        background-size: cover; 
+        background-size: 100% 100%; /* 배경을 화면에 꽉 채움 */
         background-position: center; 
     }
 
     #start-screen {
         position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-        background-image: url('첫 장면.png'); background-size: cover; background-position: center;
+        background-image: url('첫 장면.png'); 
+        background-size: 100% 100%; 
+        background-position: center;
         z-index: 500; display: flex; justify-content: flex-start; align-items: center;
-        flex-direction: column; overflow: hidden;
+        flex-direction: column;
     }
 
-    /* ✨ 파티클 스타일 (60개 최적화) */
+    /* ✨ 파티클 스타일 */
     #particle-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 501; pointer-events: none; }
     .particle {
         position: absolute; border-radius: 50%; background: #ffffff; 
@@ -47,12 +55,13 @@
         100% { opacity: 1; transform: scale(1.1); } 
     }
 
-    /* 💖 손까딱 스타일 */
+    /* 💖 손까딱 스타일 - 모바일 화면 비율에 맞춰 크기 조정 */
     #waving-hand {
         position: absolute;
-        bottom: 20px;      
-        right: -80px;      
-        width: 500px;      
+        bottom: 5%;      
+        right: -10%;      
+        width: 80%; /* 화면 너비의 80%로 유연하게 설정 */
+        max-width: 500px;
         height: auto;
         z-index: 505;      
         pointer-events: none;
@@ -65,15 +74,49 @@
         100% { transform: rotate(12deg); }
     }
 
-    /* UI 및 버튼 스타일 */
-    .ui { position: absolute; top: 20px; left: 20px; font-size: 22px; font-weight: bold; color: #5d4037; z-index: 100; background: rgba(255, 255, 255, 0.85); padding: 5px 15px; border-radius: 20px; }
-    .dog-container { position: absolute; top: 2%; left: 50%; transform: translateX(-50%); width: 660px; pointer-events: none; z-index: 10; }
+    /* UI 및 아이템 스타일 조정 */
+    .ui { 
+        position: absolute; top: 15px; left: 15px; 
+        font-size: 18px; font-weight: bold; color: #5d4037; 
+        z-index: 100; background: rgba(255, 255, 255, 0.85); 
+        padding: 5px 12px; border-radius: 20px; 
+    }
+
+    .dog-container { 
+        position: absolute; top: 5%; left: 50%; 
+        transform: translateX(-50%); 
+        width: 90%; /* 강아지 크기도 화면 너비에 맞춤 */
+        max-width: 600px;
+        pointer-events: none; z-index: 10; 
+    }
     #dog-img { width: 100%; height: auto; }
-    .item { position: absolute; width: 110px; height: auto; cursor: pointer; z-index: 50; }
-    .item.selected { filter: drop-shadow(0 0 20px #ff5722) brightness(1.1); transform: scale(1.2) rotate(5deg); }
-    #result-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: url('점수.png'); background-size: cover; background-position: center; display: none; flex-direction: column; justify-content: flex-start; align-items: center; z-index: 300; color: white; font-family: 'BMKkubulimTTF', sans-serif; padding-top: 15vh; }
-    .btn-action { padding: 15px 40px; background: #ff4081; color: white; border-radius: 50px; border: none; font-size: 24px; font-family: 'BMKkubulimTTF', sans-serif; font-weight: bold; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.5); z-index: 502; position: relative; }
-    #start-btn { margin-top: 40vh; } 
+
+    .item { 
+        position: absolute; 
+        width: 25vw; /* 화면 너비의 25% 크기로 아이템 조정 */
+        max-width: 110px;
+        height: auto; 
+        cursor: pointer; z-index: 50; 
+    }
+    
+    /* 결과 화면 */
+    #result-screen { 
+        position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+        background-image: url('점수.png'); 
+        background-size: 100% 100%; 
+        display: none; flex-direction: column; 
+        justify-content: center; align-items: center; 
+        z-index: 300; color: white; font-family: 'BMKkubulimTTF', sans-serif; 
+    }
+
+    .btn-action { 
+        padding: 12px 30px; background: #ff4081; color: white; 
+        border-radius: 50px; border: none; font-size: 20px; 
+        font-family: 'BMKkubulimTTF', sans-serif; font-weight: bold; 
+        cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.3); 
+        z-index: 502; 
+    }
+    #start-btn { margin-top: 20%; } 
 </style>
 </head>
 <body>
@@ -97,8 +140,8 @@
     </div>
     
     <div id="result-screen">
-        <div style="font-size: 68px; text-shadow: 3px 3px 8px #000; margin-bottom: 20px; line-height: 1.1;">손 쉴 틈 없이 먹은<br>치킨 조각</div>
-        <div style="font-size: 80px; color: #ffcc00; text-shadow: 4px 4px 10px #000; margin-bottom: 20px;"><span id="last-score">0</span>개</div>
+        <div style="font-size: 10vw; text-shadow: 2px 2px 5px #000; margin-bottom: 10px; line-height: 1.1;">손 쉴 틈 없이 먹은<br>치킨 조각</div>
+        <div style="font-size: 15vw; color: #ffcc00; text-shadow: 3px 3px 8px #000; margin-bottom: 30px;"><span id="last-score">0</span>개</div>
         <button onclick="location.reload()" class="btn-action">다시 도전하기</button>
     </div>
 </div>
@@ -110,21 +153,16 @@
 
     function createParticles() {
         if (!gameOver) return;
-        
-        // 🚀 개수 60개로 최종 설정
         for(let i=0; i<60; i++) {
             const p = document.createElement("div");
             p.className = "particle";
-            const size = Math.random() * 9 + 3; 
+            const size = Math.random() * 8 + 3; 
             p.style.width = `${size}px`; 
             p.style.height = `${size}px`;
             p.style.top = `${Math.random() * 100}%`; 
             p.style.left = `${Math.random() * 100}%`;
             particleContainer.appendChild(p);
-            
-            setTimeout(() => {
-                if(p.parentNode) p.remove();
-            }, 600);
+            setTimeout(() => { if(p.parentNode) p.remove(); }, 600);
         }
     }
 
@@ -139,7 +177,6 @@
         randomTurn();
     });
 
-    // 게임 로직 유지
     const scoreEl = document.getElementById("score");
     const dogImg = document.getElementById("dog-img");
     const chicken = document.getElementById("chicken");
@@ -150,12 +187,13 @@
 
     function relocateItems() {
         if (gameOver) return;
-        const gameWidth = document.getElementById("game").clientWidth;
-        const gameHeight = document.getElementById("game").clientHeight;
-        chicken.style.left = `${Math.random() * (gameWidth - 150) + 50}px`;
-        chicken.style.top = `${Math.random() * (gameHeight - 400) + 300}px`;
-        sauce.style.left = `${Math.random() * (gameWidth - 150) + 50}px`;
-        sauce.style.top = `${Math.random() * (gameHeight - 400) + 300}px`;
+        const gameWidth = window.innerWidth;
+        const gameHeight = window.innerHeight;
+        // 모바일 화면 하단 영역에서 무작위 배치
+        chicken.style.left = `${Math.random() * (gameWidth - 100) + 10}px`;
+        chicken.style.top = `${Math.random() * (gameHeight * 0.4) + (gameHeight * 0.5)}px`;
+        sauce.style.left = `${Math.random() * (gameWidth - 100) + 10}px`;
+        sauce.style.top = `${Math.random() * (gameHeight * 0.4) + (gameHeight * 0.5)}px`;
         chicken.style.display = "block"; sauce.style.display = "block";
         chicken.classList.remove("selected");
         state = "idle";
@@ -177,13 +215,16 @@
         }, waitTime);
     }
 
-    chicken.addEventListener("mousedown", () => {
+    // 모바일 터치 대응 (mousedown 대신 touchstart 혹은 그대로 사용 가능)
+    chicken.addEventListener("mousedown", (e) => {
+        e.preventDefault();
         if (gameOver) return;
         if (isLooking) return endGame();
         if (state === "idle") { state = "picked"; chicken.classList.add("selected"); }
     });
 
-    sauce.addEventListener("mousedown", () => {
+    sauce.addEventListener("mousedown", (e) => {
+        e.preventDefault();
         if (gameOver) return;
         if (isLooking) return endGame();
         if (state === "picked") {
