@@ -13,35 +13,42 @@
     body { 
         margin: 0; 
         padding: 0;
-        background: #000; 
+        background: #000; /* 빈 부분은 검정색으로 처리 */
         font-family: 'Arial', sans-serif; 
         text-align: center; 
         overflow: hidden; 
-        touch-action: manipulation; /* 모바일에서 더블탭 줌 방지 */
+        touch-action: manipulation;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
     }
     
     #game { 
         position: relative; 
         width: 100vw; 
         height: 100vh; 
-        margin: 0 auto; 
+        max-width: 500px; /* 너무 퍼지지 않게 최대 폭 설정 */
+        max-height: 100vh;
         overflow: hidden; 
-        background-color: #fffbe6;
+        background-color: #000;
         background-image: url('배경2.png'); 
-        background-size: 100% 100%; /* 배경을 화면에 꽉 채움 */
+        background-size: contain; /* 비율 유지하며 꽉 채움 */
+        background-repeat: no-repeat;
         background-position: center; 
     }
 
     #start-screen {
         position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+        background-color: #000;
         background-image: url('첫 장면.png'); 
-        background-size: 100% 100%; 
+        background-size: contain; 
+        background-repeat: no-repeat;
         background-position: center;
-        z-index: 500; display: flex; justify-content: flex-start; align-items: center;
+        z-index: 500; display: flex; justify-content: center; align-items: center;
         flex-direction: column;
     }
 
-    /* ✨ 파티클 스타일 */
     #particle-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 501; pointer-events: none; }
     .particle {
         position: absolute; border-radius: 50%; background: #ffffff; 
@@ -50,18 +57,13 @@
         opacity: 0;
     }
 
-    @keyframes twinkleFade { 
-        0% { opacity: 0; transform: scale(0.4); } 
-        100% { opacity: 1; transform: scale(1.1); } 
-    }
+    @keyframes twinkleFade { 0% { opacity: 0; transform: scale(0.4); } 100% { opacity: 1; transform: scale(1.1); } }
 
-    /* 💖 손까딱 스타일 - 모바일 화면 비율에 맞춰 크기 조정 */
     #waving-hand {
         position: absolute;
-        bottom: 5%;      
-        right: -10%;      
-        width: 80%; /* 화면 너비의 80%로 유연하게 설정 */
-        max-width: 500px;
+        bottom: 10%;      
+        right: 0%;      
+        width: 70%; 
         height: auto;
         z-index: 505;      
         pointer-events: none;
@@ -69,54 +71,51 @@
         transform-origin: bottom right;
     }
 
-    @keyframes wavingHand {
-        0% { transform: rotate(-12deg); }
-        100% { transform: rotate(12deg); }
-    }
+    @keyframes wavingHand { 0% { transform: rotate(-12deg); } 100% { transform: rotate(12deg); } }
 
-    /* UI 및 아이템 스타일 조정 */
     .ui { 
-        position: absolute; top: 15px; left: 15px; 
+        position: absolute; top: 20px; left: 50%; 
+        transform: translateX(-50%);
         font-size: 18px; font-weight: bold; color: #5d4037; 
         z-index: 100; background: rgba(255, 255, 255, 0.85); 
-        padding: 5px 12px; border-radius: 20px; 
+        padding: 5px 15px; border-radius: 20px; white-space: nowrap;
     }
 
     .dog-container { 
-        position: absolute; top: 5%; left: 50%; 
+        position: absolute; top: 15%; left: 50%; 
         transform: translateX(-50%); 
-        width: 90%; /* 강아지 크기도 화면 너비에 맞춤 */
-        max-width: 600px;
+        width: 85%; 
         pointer-events: none; z-index: 10; 
     }
-    #dog-img { width: 100%; height: auto; }
+    #dog-img { width: 100%; height: auto; display: block; }
 
     .item { 
         position: absolute; 
-        width: 25vw; /* 화면 너비의 25% 크기로 아이템 조정 */
-        max-width: 110px;
+        width: 100px; 
         height: auto; 
         cursor: pointer; z-index: 50; 
     }
     
-    /* 결과 화면 */
     #result-screen { 
         position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
+        background-color: #000;
         background-image: url('점수.png'); 
-        background-size: 100% 100%; 
+        background-size: contain; 
+        background-repeat: no-repeat;
+        background-position: center;
         display: none; flex-direction: column; 
         justify-content: center; align-items: center; 
         z-index: 300; color: white; font-family: 'BMKkubulimTTF', sans-serif; 
     }
 
     .btn-action { 
-        padding: 12px 30px; background: #ff4081; color: white; 
+        padding: 12px 35px; background: #ff4081; color: white; 
         border-radius: 50px; border: none; font-size: 20px; 
         font-family: 'BMKkubulimTTF', sans-serif; font-weight: bold; 
         cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.3); 
         z-index: 502; 
     }
-    #start-btn { margin-top: 20%; } 
+    #start-btn { margin-top: 50%; } 
 </style>
 </head>
 <body>
@@ -140,8 +139,8 @@
     </div>
     
     <div id="result-screen">
-        <div style="font-size: 10vw; text-shadow: 2px 2px 5px #000; margin-bottom: 10px; line-height: 1.1;">손 쉴 틈 없이 먹은<br>치킨 조각</div>
-        <div style="font-size: 15vw; color: #ffcc00; text-shadow: 3px 3px 8px #000; margin-bottom: 30px;"><span id="last-score">0</span>개</div>
+        <div style="font-size: 32px; text-shadow: 2px 2px 5px #000; margin-bottom: 10px;">손 쉴 틈 없이 먹은<br>치킨 조각</div>
+        <div style="font-size: 50px; color: #ffcc00; text-shadow: 3px 3px 8px #000; margin-bottom: 30px;"><span id="last-score">0</span>개</div>
         <button onclick="location.reload()" class="btn-action">다시 도전하기</button>
     </div>
 </div>
@@ -157,10 +156,8 @@
             const p = document.createElement("div");
             p.className = "particle";
             const size = Math.random() * 8 + 3; 
-            p.style.width = `${size}px`; 
-            p.style.height = `${size}px`;
-            p.style.top = `${Math.random() * 100}%`; 
-            p.style.left = `${Math.random() * 100}%`;
+            p.style.width = `${size}px`; p.style.height = `${size}px`;
+            p.style.top = `${Math.random() * 100}%`; p.style.left = `${Math.random() * 100}%`;
             particleContainer.appendChild(p);
             setTimeout(() => { if(p.parentNode) p.remove(); }, 600);
         }
@@ -187,13 +184,14 @@
 
     function relocateItems() {
         if (gameOver) return;
-        const gameWidth = window.innerWidth;
-        const gameHeight = window.innerHeight;
-        // 모바일 화면 하단 영역에서 무작위 배치
-        chicken.style.left = `${Math.random() * (gameWidth - 100) + 10}px`;
-        chicken.style.top = `${Math.random() * (gameHeight * 0.4) + (gameHeight * 0.5)}px`;
-        sauce.style.left = `${Math.random() * (gameWidth - 100) + 10}px`;
-        sauce.style.top = `${Math.random() * (gameHeight * 0.4) + (gameHeight * 0.5)}px`;
+        const rect = document.getElementById("game").getBoundingClientRect();
+        const gameWidth = rect.width;
+        const gameHeight = rect.height;
+        // 아이템이 배경 이미지의 하단 박스 안쪽에 위치하도록 범위 제한
+        chicken.style.left = `${Math.random() * (gameWidth - 110) + 5}px`;
+        chicken.style.top = `${Math.random() * (gameHeight * 0.3) + (gameHeight * 0.6)}px`;
+        sauce.style.left = `${Math.random() * (gameWidth - 110) + 5}px`;
+        sauce.style.top = `${Math.random() * (gameHeight * 0.3) + (gameHeight * 0.6)}px`;
         chicken.style.display = "block"; sauce.style.display = "block";
         chicken.classList.remove("selected");
         state = "idle";
@@ -215,24 +213,26 @@
         }, waitTime);
     }
 
-    // 모바일 터치 대응 (mousedown 대신 touchstart 혹은 그대로 사용 가능)
-    chicken.addEventListener("mousedown", (e) => {
+    function handleStart(e) {
         e.preventDefault();
+        const target = e.target;
         if (gameOver) return;
         if (isLooking) return endGame();
-        if (state === "idle") { state = "picked"; chicken.classList.add("selected"); }
-    });
 
-    sauce.addEventListener("mousedown", (e) => {
-        e.preventDefault();
-        if (gameOver) return;
-        if (isLooking) return endGame();
-        if (state === "picked") {
-            score++; scoreEl.innerText = score;
+        if (target === chicken && state === "idle") {
+            state = "picked";
+            chicken.classList.add("selected");
+        } else if (target === sauce && state === "picked") {
+            score++;
+            scoreEl.innerText = score;
             relocateItems();
-            if (score >= 100) { gameOver = true; alert("성공!"); location.reload(); }
         }
-    });
+    }
+
+    chicken.addEventListener("touchstart", handleStart);
+    sauce.addEventListener("touchstart", handleStart);
+    chicken.addEventListener("mousedown", handleStart);
+    sauce.addEventListener("mousedown", handleStart);
 
     function endGame() {
         gameOver = true;
