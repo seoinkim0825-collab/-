@@ -5,88 +5,59 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>강아지 몰래 쏘이갈릭킹!</title>
 <style>
-    @font-face {
-        font-family: 'BMKkubulimTTF';
-        src: url('BMKkubulimTTF.ttf') format('truetype');
-    }
+    @font-face { font-family: 'BMKkubulimTTF'; src: url('BMKkubulimTTF.ttf') format('truetype'); }
     
-    body { 
-        margin: 0; padding: 0; background: #000; 
-        font-family: 'Arial', sans-serif; text-align: center; 
-        overflow: hidden; touch-action: manipulation;
-        display: flex; justify-content: center; align-items: center; height: 100vh;
-    }
+    body { margin: 0; padding: 0; background: #000; font-family: 'Arial', sans-serif; text-align: center; overflow: hidden; touch-action: manipulation; display: flex; justify-content: center; align-items: center; height: 100vh; }
     
-    #game { 
-        position: relative; width: 100vw; height: 100vh; 
-        max-width: 500px; max-height: 100vh; overflow: hidden; 
-        background-color: #000; background-image: url('배경2.png'); 
-        background-size: contain; background-repeat: no-repeat; background-position: center; 
-    }
+    #game { position: relative; width: 100vw; height: 100vh; max-width: 500px; max-height: 100vh; overflow: hidden; background-color: #000; background-image: url('배경2.png'); background-size: contain; background-repeat: no-repeat; background-position: center; }
 
-    #start-screen {
-        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-        background-color: #000; background-image: url('첫 장면.png'); 
-        background-size: contain; background-repeat: no-repeat; background-position: center;
-        z-index: 500; display: flex; justify-content: center; align-items: center; flex-direction: column;
-    }
+    #start-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: #000; background-image: url('첫 장면.png'); background-size: contain; background-repeat: no-repeat; background-position: center; z-index: 500; display: flex; justify-content: center; align-items: center; flex-direction: column; }
 
     #particle-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 501; pointer-events: none; }
-    .particle {
-        position: absolute; border-radius: 50%; background: #ffffff; 
-        box-shadow: 0 0 15px 5px rgba(255, 255, 255, 0.75);
-        animation: twinkleFade 0.6s infinite steps(2); opacity: 0;
-    }
+    .particle { position: absolute; border-radius: 50%; background: #ffffff; box-shadow: 0 0 15px 5px rgba(255, 255, 255, 0.75); animation: twinkleFade 0.6s infinite steps(2); opacity: 0; pointer-events: none; }
     @keyframes twinkleFade { 0% { opacity: 0; transform: scale(0.4); } 100% { opacity: 1; transform: scale(1.1); } }
+    
+    .click-effect { position: absolute; border-radius: 50%; background: #ffeb3b; width: 10px; height: 10px; z-index: 60; pointer-events: none; animation: burst 0.4s ease-out forwards; }
+    @keyframes burst { 0% { transform: translate(0, 0) scale(1); opacity: 1; } 100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; } }
 
-    /* 💖 손까딱: 화면 밖으로 더 많이 빼서 잘림 현상 방지 및 시야 확보 */
-    #waving-hand {
-        position: absolute;
-        bottom: 5%;      
-        right: -15%;      /* ⬅️ 오른쪽 밖으로 더 많이 밀어서 자연스럽게 걸치도록 수정 */
-        width: 75%; 
-        height: auto;
-        z-index: 505;      
-        pointer-events: none;
-        animation: wavingHand 0.6s infinite steps(2); 
-        transform-origin: bottom right;
-    }
+    #waving-hand { position: absolute; bottom: 5%; right: -15%; width: 75%; height: auto; z-index: 505; pointer-events: none; animation: wavingHand 0.6s infinite steps(2); transform-origin: bottom right; }
     @keyframes wavingHand { 0% { transform: rotate(-10deg); } 100% { transform: rotate(10deg); } }
 
-    .ui { 
-        position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
-        font-size: 18px; font-weight: bold; color: #5d4037; 
-        z-index: 100; background: rgba(255, 255, 255, 0.85); 
-        padding: 5px 15px; border-radius: 20px; white-space: nowrap;
-    }
+    .ui { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); font-size: 18px; font-weight: bold; color: #5d4037; z-index: 100; background: rgba(255, 255, 255, 0.85); padding: 5px 15px; border-radius: 20px; white-space: nowrap; }
 
-    .dog-container { 
-        position: absolute; top: 13%; left: 50%; transform: translateX(-50%); 
-        width: 100%; pointer-events: none; z-index: 10; 
-    }
+    .dog-container { position: absolute; top: 13%; left: 50%; transform: translateX(-50%); width: 100%; pointer-events: none; z-index: 10; }
     #dog-img { width: 100%; height: auto; display: block; }
 
-    .item { position: absolute; width: 100px; height: auto; cursor: pointer; z-index: 50; }
-    
+    .item { position: absolute; width: 100px; height: auto; cursor: pointer; z-index: 50; transition: transform 0.1s; }
+    .item.selected { filter: drop-shadow(0 0 15px #ff5722) brightness(1.1); animation: shake 0.5s infinite; }
+    @keyframes shake { 0%, 100% { transform: scale(1.1) rotate(0deg); } 25% { transform: scale(1.1) rotate(3deg); } 75% { transform: scale(1.1) rotate(-3deg); } }
+
+    /* 🏆 결과 화면 수정: 배경 짤림 방지 및 버튼 중앙 배치 */
     #result-screen { 
         position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
-        background-color: #000; background-image: url('점수.png'); 
-        background-size: contain; background-repeat: no-repeat; background-position: center;
-        display: none; flex-direction: column; 
-        justify-content: center; align-items: center; 
-        z-index: 300; color: white; font-family: 'BMKkubulimTTF', sans-serif;
-        padding-bottom: 10vh; 
+        background-color: #000; 
+        background-image: url('점수.png'); 
+        background-size: contain; 
+        background-repeat: no-repeat; 
+        background-position: center; /* 이미지를 상하좌우 정중앙에 고정 */
+        display: none; 
+        flex-direction: column; 
+        justify-content: center; /* 세로 중앙 정렬 */
+        align-items: center; 
+        z-index: 300; 
+        color: white; 
+        font-family: 'BMKkubulimTTF', sans-serif; 
+    }
+
+    /* 텍스트 영역: 버튼 위로 충분한 공간 확보 */
+    .result-text-area {
+        margin-bottom: 40px; /* 버튼과의 간격 */
+        margin-top: -50px;    /* 전체적으로 위로 살짝 끌어올림 */
     }
 
     .btn-action { 
-        padding: 12px 35px; background: #ff4081; color: white; 
-        border-radius: 50px; border: none; font-size: 20px; 
-        font-family: 'BMKkubulimTTF', sans-serif; font-weight: bold; 
-        cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.3); 
-        z-index: 502; margin-top: 20px; 
+        padding: 12px 35px; background: #ff4081; color: white; border-radius: 50px; border: none; font-size: 20px; font-family: 'BMKkubulimTTF', sans-serif; font-weight: bold; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.3); z-index: 502; 
     }
-    
-    #start-btn { margin-top: 0; } 
 </style>
 </head>
 <body>
@@ -110,13 +81,37 @@
     </div>
     
     <div id="result-screen">
-        <div style="font-size: 32px; text-shadow: 2px 2px 5px #000; margin-bottom: 5px; line-height: 1.2;">손 쉴 틈 없이 먹은<br>치킨 조각</div>
-        <div style="font-size: 55px; color: #ffcc00; text-shadow: 3px 3px 8px #000; margin-bottom: 10px;"><span id="last-score">0</span>개</div>
-        <button onclick="location.reload()" class="btn-action">다시 도전하기</button>
+        <div class="result-text-area">
+            <div style="font-size: 32px; text-shadow: 2px 2px 5px #000; margin-bottom: 5px; line-height: 1.2;">손 쉴 틈 없이 먹은<br>치킨 조각</div>
+            <div style="font-size: 55px; color: #ffcc00; text-shadow: 3px 3px 8px #000;"><span id="last-score">0</span>개</div>
+        </div>
+        <button onclick="location.reload()" class="btn-action">다시 시작하기</button>
     </div>
 </div>
 
 <script>
+    // ... 기존 자바스크립트 로직 (sounds, particles, game logic 등) ...
+    // [이전 답변의 스크립트와 동일하므로 지면 관계상 생략하지만, 실제 코드엔 그대로 포함하세요]
+    const sounds = {
+        bgmStart: new Audio('https://assets.mixkit.co/music/preview/mixkit-funny-pj-party-592.mp3'),
+        bgmPlay: new Audio('https://assets.mixkit.co/music/preview/mixkit-comical-stealth-703.mp3'),
+        clickChicken: new Audio('https://www.soundjay.com/buttons/sounds/button-10.mp3'),
+        clickSauce: new Audio('https://www.soundjay.com/buttons/sounds/button-15.mp3'),
+        dogBark: new Audio('https://www.soundjay.com/nature/sounds/dog-bark-1.mp3'),
+        scoreResult: new Audio('https://www.soundjay.com/misc/sounds/magic-chime-01.mp3')
+    };
+
+    sounds.bgmStart.loop = true;
+    sounds.bgmPlay.loop = true;
+    sounds.bgmStart.volume = 0.3;
+    sounds.bgmPlay.volume = 0.3;
+
+    window.addEventListener('click', () => {
+        if(gameOver && startScreen.style.display !== "none") {
+            sounds.bgmStart.play().catch(e => console.log("BGM 대기"));
+        }
+    }, { once: true });
+
     let score = 0; let isLooking = false; let gameOver = true;
     const startScreen = document.getElementById("start-screen");
     const particleContainer = document.getElementById("particle-container");
@@ -133,10 +128,24 @@
             setTimeout(() => { if(p.parentNode) p.remove(); }, 600);
         }
     }
-
     let pInterval = setInterval(createParticles, 600);
 
+    function spawnClickEffect(x, y) {
+        for(let i=0; i<8; i++) {
+            const eff = document.createElement("div");
+            eff.className = "click-effect";
+            eff.style.left = x + "px"; eff.style.top = y + "px";
+            const tx = (Math.random() - 0.5) * 100; const ty = (Math.random() - 0.5) * 100;
+            eff.style.setProperty('--tx', `${tx}px`); eff.style.setProperty('--ty', `${ty}px`);
+            document.getElementById("game").appendChild(eff);
+            setTimeout(() => eff.remove(), 400);
+        }
+    }
+
     document.getElementById("start-btn").addEventListener("click", () => {
+        sounds.bgmStart.pause();
+        sounds.bgmPlay.currentTime = 0;
+        sounds.bgmPlay.play();
         startScreen.style.display = "none"; 
         clearInterval(pInterval);
         particleContainer.innerHTML = '';
@@ -156,14 +165,11 @@
     function relocateItems() {
         if (gameOver) return;
         const rect = document.getElementById("game").getBoundingClientRect();
-        const gameWidth = rect.width;
-        const gameHeight = rect.height;
-        
+        const gameWidth = rect.width; const gameHeight = rect.height;
         chicken.style.left = `${Math.random() * (gameWidth - 110) + 5}px`;
         chicken.style.top = `${Math.random() * (gameHeight * 0.25) + (gameHeight * 0.65)}px`;
         sauce.style.left = `${Math.random() * (gameWidth - 110) + 5}px`;
         sauce.style.top = `${Math.random() * (gameHeight * 0.25) + (gameHeight * 0.65)}px`;
-        
         chicken.style.display = "block"; sauce.style.display = "block";
         chicken.classList.remove("selected");
         state = "idle";
@@ -188,15 +194,22 @@
     function handleStart(e) {
         e.preventDefault();
         const target = e.target;
+        const touch = e.touches ? e.touches[0] : e;
         if (gameOver) return;
         if (isLooking) return endGame();
 
         if (target === chicken && state === "idle") {
             state = "picked";
             chicken.classList.add("selected");
+            sounds.clickChicken.currentTime = 0;
+            sounds.clickChicken.play();
+            spawnClickEffect(touch.pageX, touch.pageY);
         } else if (target === sauce && state === "picked") {
             score++;
             scoreEl.innerText = score;
+            sounds.clickSauce.currentTime = 0;
+            sounds.clickSauce.play();
+            spawnClickEffect(touch.pageX, touch.pageY);
             relocateItems();
         }
     }
@@ -208,6 +221,8 @@
 
     function endGame() {
         gameOver = true;
+        sounds.bgmPlay.pause();
+        sounds.dogBark.play();
         const fullEndingImg = document.getElementById("full-ending-img");
         document.getElementById("ending-overlay").style.display = "flex";
         fullEndingImg.src = "ending1.png"; 
@@ -217,6 +232,7 @@
                 document.getElementById("ending-overlay").style.display = "none";
                 resultScreen.style.display = "flex";
                 lastScoreEl.innerText = score;
+                sounds.scoreResult.play();
             }, 1200);
         }, 800);
     }
