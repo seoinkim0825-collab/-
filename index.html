@@ -9,23 +9,33 @@
     
     body { margin: 0; padding: 0; background: #000; font-family: 'Arial', sans-serif; text-align: center; overflow: hidden; touch-action: manipulation; display: flex; justify-content: center; align-items: center; height: 100vh; }
     
-    #game { position: relative; width: 100vw; height: 100vh; max-width: 500px; max-height: 100vh; overflow: hidden; background-color: #000; background-image: url('배경2.png'); background-size: contain; background-repeat: no-repeat; background-position: center; }
+    #game { position: relative; width: 100vw; height: 100vh; max-width: 500px; max-height: 100vh; overflow: hidden; background-color: #000; background-image: url('배경2.png'); background-size: cover; background-repeat: no-repeat; background-position: center; }
 
-    #start-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: #000; background-image: url('첫 장면.png'); background-size: contain; background-repeat: no-repeat; background-position: center; z-index: 500; display: flex; justify-content: center; align-items: center; flex-direction: column; }
+    #start-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: #000; background-image: url('첫 장면.png'); background-size: 100% 100%; background-repeat: no-repeat; background-position: center; z-index: 500; display: flex; justify-content: center; align-items: center; flex-direction: column; }
 
     #particle-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 501; pointer-events: none; }
     .particle { position: absolute; border-radius: 50%; background: #ffffff; box-shadow: 0 0 15px 5px rgba(255, 255, 255, 0.75); animation: twinkleFade 0.6s infinite steps(2); opacity: 0; pointer-events: none; }
     @keyframes twinkleFade { 0% { opacity: 0; transform: scale(0.4); } 100% { opacity: 1; transform: scale(1.1); } }
 
-    #waving-hand { position: absolute; bottom: 5%; right: -15%; width: 75%; height: auto; z-index: 505; pointer-events: none; animation: wavingHand 0.6s infinite steps(2); transform-origin: bottom right; }
+    /* 🖐️ 손 이미지 위치 수정: 버튼 바로 아래로 올림 */
+    #waving-hand { 
+        position: absolute; 
+        top: 55%; /* 버튼(중앙)보다 조금 아래 위치 */
+        right: -10%; 
+        width: 70%; 
+        height: auto; 
+        z-index: 505; 
+        pointer-events: none; 
+        animation: wavingHand 0.6s infinite steps(2); 
+        transform-origin: bottom right; 
+    }
     @keyframes wavingHand { 0% { transform: rotate(-10deg); } 100% { transform: rotate(10deg); } }
 
     .ui { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); font-size: 18px; font-weight: bold; color: #5d4037; z-index: 100; background: rgba(255, 255, 255, 0.85); padding: 5px 15px; border-radius: 20px; white-space: nowrap; }
 
-    /* 🐶 강아지 크기 1.5배 확대 */
     .dog-container { 
-        position: absolute; top: 10%; left: 50%; transform: translateX(-50%); 
-        width: 140%; 
+        position: absolute; top: 15%; left: 50%; transform: translateX(-50%); 
+        width: 70%; 
         pointer-events: none; z-index: 10; 
     }
     #dog-img { width: 100%; height: auto; display: block; }
@@ -34,12 +44,11 @@
     .item.selected { filter: drop-shadow(0 0 15px #ff5722) brightness(1.1); animation: shake 0.5s infinite; }
     @keyframes shake { 0%, 100% { transform: scale(1.1) rotate(0deg); } 25% { transform: scale(1.1) rotate(3deg); } 75% { transform: scale(1.1) rotate(-3deg); } }
 
-    /* 🏆 결과 화면 레이아웃 (위로 끌어올림) */
     #result-screen { 
         position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
         background-color: #000; 
         background-image: url('점수.png'); 
-        background-size: contain; 
+        background-size: 100% 100%; 
         background-repeat: no-repeat; 
         background-position: center; 
         display: none; 
@@ -49,10 +58,10 @@
         z-index: 300; 
         color: white; 
         font-family: 'BMKkubulimTTF', sans-serif; 
-        padding-top: 22vh; /* 더 위로 올렸습니다 */
+        padding-top: 25vh; 
     }
 
-    .result-text-area { margin-bottom: 25px; }
+    .result-text-area { margin-bottom: 30px; }
 
     .btn-action { 
         padding: 12px 35px; background: #ff4081; color: white; border-radius: 50px; border: none; font-size: 20px; font-family: 'BMKkubulimTTF', sans-serif; font-weight: bold; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.3); z-index: 502; 
@@ -81,7 +90,7 @@
     
     <div id="result-screen">
         <div class="result-text-area">
-            <div style="font-size: 28px; text-shadow: 2px 2px 5px #000; margin-bottom: 8px; line-height: 1.2;">손 쉴 틈 없이 먹은<br>치킨 조각</div>
+            <div style="font-size: 28px; text-shadow: 2px 2px 5px #000; margin-bottom: 8px; line-height: 1.2; color: #5d4037;">손 쉴 틈 없이 먹은<br>치킨 조각</div>
             <div style="font-size: 52px; color: #ffcc00; text-shadow: 3px 3px 8px #000;"><span id="last-score">0</span>개</div>
         </div>
         <button onclick="location.reload()" class="btn-action">다시 시작하기</button>
@@ -89,7 +98,6 @@
 </div>
 
 <script>
-    // 🔊 사운드 객체 로드
     const sounds = {
         bgmPlay: new Audio('https://assets.mixkit.co/music/preview/mixkit-comical-stealth-703.mp3'),
         clickChicken: new Audio('https://www.soundjay.com/buttons/sounds/button-10.mp3'),
@@ -98,18 +106,14 @@
         scoreResult: new Audio('https://www.soundjay.com/misc/sounds/magic-chime-01.mp3')
     };
 
-    // 설정
     sounds.bgmPlay.loop = true;
     sounds.bgmPlay.volume = 0.4;
 
     let score = 0; let isLooking = false; let gameOver = true;
     const startScreen = document.getElementById("start-screen");
 
-    // 🚀 [게임 시작하기]를 누르는 순간 모든 사운드가 해제됩니다!
     document.getElementById("start-btn").addEventListener("click", () => {
-        // 첫 클릭과 동시에 사운드 시작!
-        sounds.bgmPlay.play().catch(e => console.log("사운드 재생 실패:", e));
-        
+        sounds.bgmPlay.play().catch(e => console.log("Audio Error"));
         startScreen.style.display = "none"; 
         clearInterval(pInterval);
         gameOver = false; 
@@ -117,7 +121,6 @@
         randomTurn();
     });
 
-    // --- 나머지 로직 ---
     const particleContainer = document.getElementById("particle-container");
     function createParticles() {
         if (!gameOver) return;
