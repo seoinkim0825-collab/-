@@ -11,8 +11,8 @@
     
     #game { position: relative; width: 100vw; height: 100vh; max-width: 500px; max-height: 100vh; overflow: hidden; background-color: #000; background-image: url('배경2.png'); background-size: cover; background-repeat: no-repeat; background-position: center; }
 
-    /* 🏠 첫 화면 배경 설정 (기준점) */
-    #start-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: #000; background-image: url('첫 장면.png'); background-size: cover; background-repeat: no-repeat; background-position: center top; z-index: 500; display: flex; justify-content: center; align-items: center; flex-direction: column; }
+    /* 🏠 첫 화면 배경 */
+    #start-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: #000; background-image: url('첫 장면.png'); background-size: 100% 100%; background-repeat: no-repeat; background-position: center; z-index: 500; display: flex; justify-content: center; align-items: center; flex-direction: column; }
 
     #particle-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 501; pointer-events: none; }
     .particle { position: absolute; border-radius: 50%; background: #ffffff; box-shadow: 0 0 15px 5px rgba(255, 255, 255, 0.75); animation: twinkleFade 0.6s infinite steps(2); opacity: 0; pointer-events: none; }
@@ -44,14 +44,14 @@
     .item.selected { filter: drop-shadow(0 0 15px #ff5722) brightness(1.1); animation: shake 0.5s infinite; }
     @keyframes shake { 0%, 100% { transform: scale(1.1) rotate(0deg); } 25% { transform: scale(1.1) rotate(3deg); } 75% { transform: scale(1.1) rotate(-3deg); } }
 
-    /* 🏆 결과 화면 배경 (첫 화면과 동일하게 설정) */
+    /* 🏆 점수 화면 배경 (확대 방지: 100% 100% 고정) */
     #result-screen { 
         position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
         background-color: #000; 
         background-image: url('점수.png'); 
-        background-size: cover; 
+        background-size: 100% 100%; /* 절대 비율 유지 */
         background-repeat: no-repeat; 
-        background-position: center top; 
+        background-position: center; 
         display: none; 
         flex-direction: column; 
         justify-content: flex-start; 
@@ -99,18 +99,18 @@
 </div>
 
 <script>
-    // 🔊 사용자 지정 효과음으로 경로 변경
     const sounds = {
         bgmPlay: new Audio('https://assets.mixkit.co/music/preview/mixkit-comical-stealth-703.mp3'),
         clickChicken: new Audio('치킨먹는소리.mp3'),
         clickSauce: new Audio('한입.mp3'),
-        dogBark: new Audio('엔딩소리.mp3'), // 강아지가 돌아볼 때(엔딩) 소리
+        dogBark: new Audio('엔딩소리.mp3'),
         scoreResult: new Audio('https://www.soundjay.com/misc/sounds/magic-chime-01.mp3')
     };
 
+    // 🔊 사운드 볼륨 0.2로 대폭 축소 (이전의 반 이하)
     Object.values(sounds).forEach(audio => {
         audio.load();
-        audio.volume = 0.5;
+        audio.volume = 0.2; 
     });
     sounds.bgmPlay.loop = true;
 
@@ -184,21 +184,33 @@
         }, Math.random() * 2000 + 1000);
     }
 
+    // 🚀 클릭 즉시 소리 발생 로직으로 변경
     function handleStart(e) {
         e.preventDefault();
         if (gameOver) return;
+        
+        // 강아지가 볼 때 누르면 즉시 게임 오버
         if (isLooking) return endGame();
+
         const target = e.target;
+        
+        // 1. 치킨 클릭 시
         if (target === chicken && state === "idle") {
-            state = "picked";
-            chicken.classList.add("selected");
+            // 소리 즉시 재생
             sounds.clickChicken.currentTime = 0;
             sounds.clickChicken.play().catch(() => {});
-        } else if (target === sauce && state === "picked") {
-            score++;
-            scoreEl.innerText = score;
+            
+            state = "picked";
+            chicken.classList.add("selected");
+        } 
+        // 2. 소스 클릭 시
+        else if (target === sauce && state === "picked") {
+            // 소리 즉시 재생
             sounds.clickSauce.currentTime = 0;
             sounds.clickSauce.play().catch(() => {});
+
+            score++;
+            scoreEl.innerText = score;
             relocateItems();
         }
     }
@@ -211,7 +223,7 @@
     function endGame() {
         gameOver = true;
         sounds.bgmPlay.pause();
-        sounds.dogBark.play().catch(() => {}); // 엔딩 효과음 재생
+        sounds.dogBark.play().catch(() => {}); 
         document.getElementById("ending-overlay").style.display = "flex";
         document.getElementById("full-ending-img").src = "ending1.png"; 
         setTimeout(() => {
