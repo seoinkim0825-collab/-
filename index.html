@@ -17,10 +17,10 @@
     .particle { position: absolute; border-radius: 50%; background: #ffffff; box-shadow: 0 0 15px 5px rgba(255, 255, 255, 0.75); animation: twinkleFade 0.6s infinite steps(2); opacity: 0; pointer-events: none; }
     @keyframes twinkleFade { 0% { opacity: 0; transform: scale(0.4); } 100% { opacity: 1; transform: scale(1.1); } }
 
-    /* 🖐️ 손 이미지 위치 수정: 버튼 바로 아래로 올림 */
+    /* 🖐️ 손 이미지 위치: 버튼 바로 아래로 상향 조정 */
     #waving-hand { 
         position: absolute; 
-        top: 55%; /* 버튼(중앙)보다 조금 아래 위치 */
+        top: 55%; 
         right: -10%; 
         width: 70%; 
         height: auto; 
@@ -33,6 +33,7 @@
 
     .ui { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); font-size: 18px; font-weight: bold; color: #5d4037; z-index: 100; background: rgba(255, 255, 255, 0.85); padding: 5px 15px; border-radius: 20px; white-space: nowrap; }
 
+    /* 🐶 강아지 크기: 이전 대비 0.5배 축소 (70%) */
     .dog-container { 
         position: absolute; top: 15%; left: 50%; transform: translateX(-50%); 
         width: 70%; 
@@ -44,6 +45,7 @@
     .item.selected { filter: drop-shadow(0 0 15px #ff5722) brightness(1.1); animation: shake 0.5s infinite; }
     @keyframes shake { 0%, 100% { transform: scale(1.1) rotate(0deg); } 25% { transform: scale(1.1) rotate(3deg); } 75% { transform: scale(1.1) rotate(-3deg); } }
 
+    /* 🏆 결과 화면: 배경 100% 꽉 채우기 */
     #result-screen { 
         position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
         background-color: #000; 
@@ -98,6 +100,7 @@
 </div>
 
 <script>
+    // 🔊 사운드 객체 및 초기화
     const sounds = {
         bgmPlay: new Audio('https://assets.mixkit.co/music/preview/mixkit-comical-stealth-703.mp3'),
         clickChicken: new Audio('https://www.soundjay.com/buttons/sounds/button-10.mp3'),
@@ -106,14 +109,30 @@
         scoreResult: new Audio('https://www.soundjay.com/misc/sounds/magic-chime-01.mp3')
     };
 
+    // 사운드 사전 로드 및 루프 설정
+    Object.values(sounds).forEach(s => {
+        s.load();
+        s.volume = 0.5;
+    });
     sounds.bgmPlay.loop = true;
-    sounds.bgmPlay.volume = 0.4;
 
     let score = 0; let isLooking = false; let gameOver = true;
     const startScreen = document.getElementById("start-screen");
 
-    document.getElementById("start-btn").addEventListener("click", () => {
-        sounds.bgmPlay.play().catch(e => console.log("Audio Error"));
+    // 🚀 게임 시작 버튼 클릭 이벤트 (사운드 잠금 해제 핵심)
+    document.getElementById("start-btn").addEventListener("click", function() {
+        // 모든 소리 채널을 한 번씩 건드려 브라우저 제한 해제
+        Object.values(sounds).forEach(s => {
+            s.play().then(() => {
+                if (s !== sounds.bgmPlay) {
+                    s.pause();
+                    s.currentTime = 0;
+                }
+            }).catch(e => console.log("Audio readying..."));
+        });
+
+        sounds.bgmPlay.play();
+        
         startScreen.style.display = "none"; 
         clearInterval(pInterval);
         gameOver = false; 
@@ -180,12 +199,12 @@
             state = "picked";
             chicken.classList.add("selected");
             sounds.clickChicken.currentTime = 0;
-            sounds.clickChicken.play();
+            sounds.clickChicken.play().catch(() => {});
         } else if (target === sauce && state === "picked") {
             score++;
             scoreEl.innerText = score;
             sounds.clickSauce.currentTime = 0;
-            sounds.clickSauce.play();
+            sounds.clickSauce.play().catch(() => {});
             relocateItems();
         }
     }
@@ -198,7 +217,7 @@
     function endGame() {
         gameOver = true;
         sounds.bgmPlay.pause();
-        sounds.dogBark.play();
+        sounds.dogBark.play().catch(() => {});
         document.getElementById("ending-overlay").style.display = "flex";
         document.getElementById("full-ending-img").src = "ending1.png"; 
         setTimeout(() => {
@@ -207,7 +226,7 @@
                 document.getElementById("ending-overlay").style.display = "none";
                 resultScreen.style.display = "flex";
                 lastScoreEl.innerText = score;
-                sounds.scoreResult.play();
+                sounds.scoreResult.play().catch(() => {});
             }, 1200);
         }, 800);
     }
