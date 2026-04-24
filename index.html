@@ -11,6 +11,7 @@
     
     #game { position: relative; width: 100vw; height: 100vh; max-width: 500px; max-height: 100vh; overflow: hidden; background-color: #000; background-image: url('배경2.png'); background-size: cover; background-repeat: no-repeat; background-position: center; }
 
+    /* 🏠 첫 화면 */
     #start-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: #000; background-image: url('첫 장면.png'); background-size: 100% 100%; background-repeat: no-repeat; background-position: center; z-index: 500; display: flex; justify-content: center; align-items: center; flex-direction: column; }
 
     #particle-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 501; pointer-events: none; }
@@ -29,6 +30,7 @@
     .item.selected { filter: drop-shadow(0 0 15px #ff5722) brightness(1.1); animation: shake 0.5s infinite; }
     @keyframes shake { 0%, 100% { transform: scale(1.1) rotate(0deg); } 25% { transform: scale(1.1) rotate(3deg); } 75% { transform: scale(1.1) rotate(-3deg); } }
 
+    /* 🏆 결과 화면 (그림자 제거, 흰색 글씨, 배경 100% 고정) */
     #result-screen { 
         position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
         background-color: #000; 
@@ -47,8 +49,8 @@
     }
 
     .result-text-area div { 
-        text-shadow: none !important; 
-        color: white !important; 
+        text-shadow: none !important; /* 그림자 강제 제거 */
+        color: white !important; /* 흰색 글씨 강제 적용 */
     }
 
     .btn-action { padding: 12px 35px; background: #ff4081; color: white; border-radius: 50px; border: none; font-size: 20px; font-family: 'BMKkubulimTTF', sans-serif; font-weight: bold; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.3); z-index: 502; }
@@ -88,9 +90,11 @@
         bgmPlay: new Audio('https://assets.mixkit.co/music/preview/mixkit-comical-stealth-703.mp3'),
         clickChicken: new Audio('치킨먹는소리.mp3'),
         clickSauce: new Audio('한입.mp3'),
+        dogBark: new Audio('엔딩소리.mp3'),
         scoreResult: new Audio('https://www.soundjay.com/misc/sounds/magic-chime-01.mp3')
     };
 
+    // 🔊 볼륨 20% (0.2)로 설정
     Object.values(sounds).forEach(audio => {
         audio.load();
         audio.volume = 0.2; 
@@ -100,7 +104,9 @@
     let score = 0; let isLooking = false; let gameOver = true;
     const startScreen = document.getElementById("start-screen");
 
+    // 시작 버튼 클릭 시
     document.getElementById("start-btn").addEventListener("click", function() {
+        // 무음으로 재생시켜 브라우저 오디오 제한만 해제 (효과음 삭제 효과)
         Object.values(sounds).forEach(audio => {
             let p = audio.play();
             if (p !== undefined) {
@@ -144,32 +150,14 @@
     const lastScoreEl = document.getElementById("last-score");
     let state = "idle";
 
-    // 📍 아이템 배치 시 겹침 방지 로직 추가
     function relocateItems() {
         if (gameOver) return;
         const rect = document.getElementById("game").getBoundingClientRect();
-        
-        // 치킨 위치 결정
-        const cX = Math.random() * (rect.width - 110) + 5;
-        const cY = Math.random() * (rect.height * 0.2) + (rect.height * 0.7);
-        
-        let sX, sY;
-        let dist = 0;
-        
-        // 소스 위치 결정 (치킨과 최소 120px 이상 떨어질 때까지 반복)
-        do {
-            sX = Math.random() * (rect.width - 110) + 5;
-            sY = Math.random() * (rect.height * 0.2) + (rect.height * 0.7);
-            dist = Math.sqrt(Math.pow(cX - sX, 2) + Math.pow(cY - sY, 2));
-        } while (dist < 120);
-
-        chicken.style.left = `${cX}px`;
-        chicken.style.top = `${cY}px`;
-        sauce.style.left = `${sX}px`;
-        sauce.style.top = `${sY}px`;
-        
-        chicken.style.display = "block"; 
-        sauce.style.display = "block";
+        chicken.style.left = `${Math.random() * (rect.width - 110) + 5}px`;
+        chicken.style.top = `${Math.random() * (rect.height * 0.2) + (rect.height * 0.7)}px`;
+        sauce.style.left = `${Math.random() * (rect.width - 110) + 5}px`;
+        sauce.style.top = `${Math.random() * (rect.height * 0.2) + (rect.height * 0.7)}px`;
+        chicken.style.display = "block"; sauce.style.display = "block";
         chicken.classList.remove("selected");
         state = "idle";
     }
@@ -196,15 +184,19 @@
 
         const target = e.target;
         
+        // 치킨 누를 때 효과음 발생
         if (target === chicken && state === "idle") {
             sounds.clickChicken.currentTime = 0;
             sounds.clickChicken.play().catch(() => {});
+            
             state = "picked";
             chicken.classList.add("selected");
         } 
+        // 소스 누를 때 효과음 발생
         else if (target === sauce && state === "picked") {
             sounds.clickSauce.currentTime = 0;
             sounds.clickSauce.play().catch(() => {});
+
             score++;
             scoreEl.innerText = score;
             relocateItems();
@@ -213,13 +205,13 @@
 
     chicken.addEventListener("mousedown", handleStart);
     sauce.addEventListener("mousedown", handleStart);
-    chicken.addEventListener("touchstart", handleStart, {passive: false});
-    sauce.addEventListener("touchstart", handleStart, {passive: false});
+    chicken.addEventListener("touchstart", handleStart);
+    sauce.addEventListener("touchstart", handleStart);
 
     function endGame() {
         gameOver = true;
         sounds.bgmPlay.pause();
-        // 엔딩 사운드 재생 코드 삭제됨
+        sounds.dogBark.play().catch(() => {}); 
         document.getElementById("ending-overlay").style.display = "flex";
         document.getElementById("full-ending-img").src = "ending1.png"; 
         setTimeout(() => {
