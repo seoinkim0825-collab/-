@@ -11,45 +11,31 @@
     
     #game { position: relative; width: 100vw; height: 100vh; max-width: 500px; max-height: 100vh; overflow: hidden; background-color: #000; background-image: url('배경2.png'); background-size: cover; background-repeat: no-repeat; background-position: center; }
 
-    /* 🏠 첫 화면 배경 */
+    /* 🏠 첫 화면 */
     #start-screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: #000; background-image: url('첫 장면.png'); background-size: 100% 100%; background-repeat: no-repeat; background-position: center; z-index: 500; display: flex; justify-content: center; align-items: center; flex-direction: column; }
 
     #particle-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 501; pointer-events: none; }
     .particle { position: absolute; border-radius: 50%; background: #ffffff; box-shadow: 0 0 15px 5px rgba(255, 255, 255, 0.75); animation: twinkleFade 0.6s infinite steps(2); opacity: 0; pointer-events: none; }
     @keyframes twinkleFade { 0% { opacity: 0; transform: scale(0.4); } 100% { opacity: 1; transform: scale(1.1); } }
 
-    #waving-hand { 
-        position: absolute; 
-        top: 58%; 
-        right: -10%; 
-        width: 70%; 
-        height: auto; 
-        z-index: 505; 
-        pointer-events: none; 
-        animation: wavingHand 0.6s infinite steps(2); 
-        transform-origin: bottom right; 
-    }
+    #waving-hand { position: absolute; top: 58%; right: -10%; width: 70%; height: auto; z-index: 505; pointer-events: none; animation: wavingHand 0.6s infinite steps(2); transform-origin: bottom right; }
     @keyframes wavingHand { 0% { transform: rotate(-10deg); } 100% { transform: rotate(10deg); } }
 
     .ui { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); font-size: 18px; font-weight: bold; color: #5d4037; z-index: 100; background: rgba(255, 255, 255, 0.85); padding: 5px 15px; border-radius: 20px; white-space: nowrap; }
 
-    .dog-container { 
-        position: absolute; top: 10%; left: 50%; transform: translateX(-50%); 
-        width: 140%; 
-        pointer-events: none; z-index: 10; 
-    }
+    .dog-container { position: absolute; top: 10%; left: 50%; transform: translateX(-50%); width: 140%; pointer-events: none; z-index: 10; }
     #dog-img { width: 100%; height: auto; display: block; }
 
     .item { position: absolute; width: 100px; height: auto; cursor: pointer; z-index: 50; transition: transform 0.1s; }
     .item.selected { filter: drop-shadow(0 0 15px #ff5722) brightness(1.1); animation: shake 0.5s infinite; }
     @keyframes shake { 0%, 100% { transform: scale(1.1) rotate(0deg); } 25% { transform: scale(1.1) rotate(3deg); } 75% { transform: scale(1.1) rotate(-3deg); } }
 
-    /* 🏆 점수 화면 배경 (확대 방지: 100% 100% 고정) */
+    /* 🏆 결과 화면 (그림자 제거, 흰색 글씨, 배경 100% 고정) */
     #result-screen { 
         position: absolute; top: 0; left: 0; width: 100%; height: 100%; 
         background-color: #000; 
         background-image: url('점수.png'); 
-        background-size: 100% 100%; /* 절대 비율 유지 */
+        background-size: 100% 100%; 
         background-repeat: no-repeat; 
         background-position: center; 
         display: none; 
@@ -62,11 +48,12 @@
         padding-top: 25vh; 
     }
 
-    .result-text-area { margin-bottom: 30px; }
-
-    .btn-action { 
-        padding: 12px 35px; background: #ff4081; color: white; border-radius: 50px; border: none; font-size: 20px; font-family: 'BMKkubulimTTF', sans-serif; font-weight: bold; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.3); z-index: 502; 
+    .result-text-area div { 
+        text-shadow: none !important; /* 그림자 강제 제거 */
+        color: white !important; /* 흰색 글씨 강제 적용 */
     }
+
+    .btn-action { padding: 12px 35px; background: #ff4081; color: white; border-radius: 50px; border: none; font-size: 20px; font-family: 'BMKkubulimTTF', sans-serif; font-weight: bold; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.3); z-index: 502; }
 </style>
 </head>
 <body>
@@ -91,10 +78,10 @@
     
     <div id="result-screen">
         <div class="result-text-area">
-            <div style="font-size: 28px; text-shadow: 2px 2px 5px #000; margin-bottom: 8px; line-height: 1.2; color: #5d4037;">손 쉴 틈 없이 먹은<br>치킨 조각</div>
-            <div style="font-size: 52px; color: #ffcc00; text-shadow: 3px 3px 8px #000;"><span id="last-score">0</span>개</div>
+            <div style="font-size: 28px; margin-bottom: 8px; line-height: 1.2;">손 쉴 틈 없이 먹은<br>치킨 조각</div>
+            <div style="font-size: 52px;"><span id="last-score">0</span>개</div>
         </div>
-        <button onclick="location.reload()" class="btn-action">다시 시작하기</button>
+        <button onclick="location.reload()" class="btn-action" style="margin-top: 20px;">다시 시작하기</button>
     </div>
 </div>
 
@@ -107,7 +94,7 @@
         scoreResult: new Audio('https://www.soundjay.com/misc/sounds/magic-chime-01.mp3')
     };
 
-    // 🔊 사운드 볼륨 0.2로 대폭 축소 (이전의 반 이하)
+    // 🔊 볼륨 20% (0.2)로 설정
     Object.values(sounds).forEach(audio => {
         audio.load();
         audio.volume = 0.2; 
@@ -117,15 +104,21 @@
     let score = 0; let isLooking = false; let gameOver = true;
     const startScreen = document.getElementById("start-screen");
 
+    // 시작 버튼 클릭 시
     document.getElementById("start-btn").addEventListener("click", function() {
+        // 무음으로 재생시켜 브라우저 오디오 제한만 해제 (효과음 삭제 효과)
         Object.values(sounds).forEach(audio => {
-            audio.play().then(() => {
-                if (audio !== sounds.bgmPlay) {
-                    audio.pause();
-                    audio.currentTime = 0;
-                }
-            }).catch(() => {});
+            let p = audio.play();
+            if (p !== undefined) {
+                p.then(() => {
+                    if (audio !== sounds.bgmPlay) {
+                        audio.pause();
+                        audio.currentTime = 0;
+                    }
+                }).catch(() => {});
+            }
         });
+        
         sounds.bgmPlay.play();
         startScreen.style.display = "none"; 
         clearInterval(pInterval);
@@ -184,28 +177,23 @@
         }, Math.random() * 2000 + 1000);
     }
 
-    // 🚀 클릭 즉시 소리 발생 로직으로 변경
     function handleStart(e) {
         e.preventDefault();
         if (gameOver) return;
-        
-        // 강아지가 볼 때 누르면 즉시 게임 오버
         if (isLooking) return endGame();
 
         const target = e.target;
         
-        // 1. 치킨 클릭 시
+        // 치킨 누를 때 효과음 발생
         if (target === chicken && state === "idle") {
-            // 소리 즉시 재생
             sounds.clickChicken.currentTime = 0;
             sounds.clickChicken.play().catch(() => {});
             
             state = "picked";
             chicken.classList.add("selected");
         } 
-        // 2. 소스 클릭 시
+        // 소스 누를 때 효과음 발생
         else if (target === sauce && state === "picked") {
-            // 소리 즉시 재생
             sounds.clickSauce.currentTime = 0;
             sounds.clickSauce.play().catch(() => {});
 
